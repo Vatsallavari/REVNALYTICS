@@ -1,55 +1,106 @@
-# Revnalytics - Malware Analysis Tool (CLI)
+<div align="center">
 
-A command-line malware analysis tool that combines Ghidra reverse engineering with AI-powered analysis. Analyze binary files and get detailed security assessments in simple, understandable terms.
+# 🔬 REVNALYTICS
+
+[![Python 3.8+](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Ghidra](https://img.shields.io/badge/Ghidra-11.x-red.svg)](https://ghidra-sre.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg)]()
+
+**AI-Powered Binary & Source Code Security Analysis Tool**
+
+*Combine the power of Ghidra reverse engineering with multi-LLM AI analysis to identify vulnerabilities and reverse engineering leverage points.*
+
+[Features](#-features) •
+[Installation](#-quick-start) •
+[Usage](#-usage) •
+[Documentation](#-configuration) •
+[Contributing](#-contributing)
+
+</div>
+
+---
+
+## 📖 Overview
+
+REVNALYTICS is a command-line security analysis tool that combines **Ghidra reverse engineering** with **AI-powered vulnerability detection**. Analyze binaries and source code to identify security vulnerabilities, reverse engineering leverage points, and get detailed assessments with CWE classifications.
+
+## ✨ Features
+
+| Feature | Description |
+|---------|-------------|
+| 🔍 **Binary Analysis** | Deep analysis using Ghidra headless mode with function decompilation |
+| 📝 **Source Code Analysis** | Direct AI-powered vulnerability scanning for C, C++, Python, and more |
+| 🤖 **Multi-LLM Support** | Automatic fallback across OpenAI, Perplexity, DeepSeek, Mistral, and Hugging Face |
+| 🎯 **Reverse Engineering Focus** | Identifies leverage points for security research (crash points, comparison gates, crypto functions) |
+| 🎨 **Color-Coded Output** | Terminal output with ANSI colors for easy vulnerability identification |
+| 📋 **CWE Classification** | Maps vulnerabilities to Common Weakness Enumeration standards |
 
 ## 🏗️ Architecture
 
-```
-CLI Tool → Ghidra Headless → AI Agent → Results Display
+```mermaid
+flowchart LR
+    A[CLI Tool<br/>revnalytics.py] --> B{Analysis Mode}
+    B -->|Binary -f| C[Ghidra Headless]
+    B -->|Source -s| D[Direct Analysis]
+    C --> E[AI Agent<br/>Multi-LLM]
+    D --> E
+    E --> F[Results Display<br/>Color-coded]
+    F --> G[JSON Report<br/>Optional]
 ```
 
-1. **CLI Interface**: Command-line tool that prompts for file location
-2. **Ghidra**: Headless mode analysis extracting functions, decompiled code, and security indicators
-3. **AI Agent**: Multi-LLM analysis (OpenAI, Perplexity, DeepSeek, Mistral, Hugging Face) that translates technical findings into simple explanations with automatic fallback
+<details>
+<summary>📊 Text Architecture Diagram</summary>
+
+```
+┌───────────────┐     ┌─────────────────┐     ┌─────────────┐     ┌─────────────────┐
+│   CLI Tool    │────▶│ Ghidra Headless │────▶│  AI Agent   │────▶│ Results Display │
+│ (revnalytics) │     │  (Binary Mode)  │     │ (Multi-LLM) │     │  (Color-coded)  │
+└───────────────┘     └─────────────────┘     └─────────────┘     └─────────────────┘
+        │                                            ▲
+        │             ┌─────────────────┐            │
+        └────────────▶│ Direct Analysis │────────────┘
+                      │  (Source Mode)  │
+                      └─────────────────┘
+```
+
+</details>
 
 ## 📋 Prerequisites
 
-- Python 3.8+
-- Ghidra (installed and configured)
-- At least one LLM API key (optional, for AI analysis):
-  - OpenAI API key
-  - Perplexity API key
-  - DeepSeek API key
-  - Mistral API key
-  - Hugging Face API key
+| Requirement | Version | Notes |
+|-------------|---------|-------|
+| Python | 3.8+ | Required |
+| Ghidra | 11.x | For binary analysis |
+| LLM API Key | - | At least one recommended (OpenAI, Perplexity, DeepSeek, Mistral, or Hugging Face) |
 
-## 🚀 Setup
+## 🚀 Quick Start
 
-### 1. Install Ghidra
-
-Download and install Ghidra from: https://ghidra-sre.org/
-
-Set the `GHIDRA_HOME` environment variable:
-```bash
-export GHIDRA_HOME="/path/to/ghidra_11.0.3_PUBLIC"
-```
-
-### 2. Backend Setup
+### 1. Clone and Setup
 
 ```bash
+git clone https://github.com/yourusername/REVNALYTICS.git
+cd REVNALYTICS
+
+# Install dependencies
 cd backend
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
+cd ..
 ```
 
-Create a `.env` file in the backend directory:
+### 2. Configure Environment
+
+Create a `.env` file in the `backend/` directory:
+
 ```env
+# Ghidra Configuration
 GHIDRA_HOME=/path/to/ghidra_11.4.2_PUBLIC
 GHIDRA_PROJECTS_DIR=/tmp/ghidra_projects
 GHIDRA_TIMEOUT=600
 
-# LLM API Keys (at least one recommended for AI analysis)
+# LLM API Keys (at least one recommended)
 # Fallback order: OpenAI -> Perplexity -> DeepSeek -> Mistral -> Hugging Face -> Basic
 OPENAI_API_KEY=your_openai_api_key_here
 PERPLEXITY_API_KEY=your_perplexity_api_key_here
@@ -58,154 +109,251 @@ MISTRAL_API_KEY=your_mistral_api_key_here
 HUGGINGFACE_API_KEY=your_huggingface_api_key_here
 ```
 
-### 3. Make CLI Tool Executable
+### 3. Run Analysis
 
 ```bash
+# Make executable (optional)
 chmod +x revnalytics.py
+
+# Analyze a binary file
+python revnalytics.py -f /path/to/binary
+
+# Analyze source code directly
+python revnalytics.py -s /path/to/source.c
+
+# Save report to JSON
+python revnalytics.py -f /path/to/binary -o report.json
 ```
 
 ## 🎯 Usage
 
-### Command Line Interface
-
-Simply run the CLI tool:
+### Command Line Options
 
 ```bash
-python revnalytics.py
+usage: revnalytics.py [-h] (-f PATH | -s PATH) [-o PATH]
+
+Revnalytics - Binary & Source Code Analysis Tool
+
+options:
+  -h, --help            show this help message and exit
+  -f PATH, --file PATH  Path to the binary file to analyze (uses Ghidra)
+  -s PATH, --source PATH
+                        Path to source code file to analyze (C, C++, Python, etc.)
+  -o PATH, --output PATH
+                        Path to save the analysis report (JSON format)
 ```
 
-Or if made executable:
+### Examples
 
 ```bash
-./revnalytics.py
+# Binary analysis with Ghidra
+python revnalytics.py -f ./execution/test1
+
+# Source code vulnerability scan
+python revnalytics.py -s ./execution/testing_programs/vuln_buffer_overflow.c
+
+# Analyze and save detailed report
+python revnalytics.py -f suspicious.exe -o analysis_report.json
+
+# Analyze Python source for vulnerabilities
+python revnalytics.py -s webapp.py -o security_scan.json
 ```
 
-The tool will:
-1. Display a welcome banner
-2. Prompt you to enter the path to the binary file
-3. Run Ghidra analysis (may take a few minutes)
-4. Send results to AI for analysis
-5. Display formatted results in the terminal
-6. Save complete results to `backend/outputs/`
+### Sample Output
 
-### Example Usage
+<details>
+<summary>🖼️ Click to expand sample output</summary>
 
-```bash
-$ python revnalytics.py
-
-╔══════════════════════════════════════════════════════════════╗
-║                                                              ║
-║                    REVNALYTICS                               ║
-║              Malware Analysis Tool (CLI)                     ║
-║                                                              ║
-╚══════════════════════════════════════════════════════════════╝
-
-Enter the path to the binary file: /path/to/suspicious.exe
-
-[*] Starting analysis of: suspicious.exe
-[*] File size: 2.45 MB
-...
 ```
+╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║                                                                                                            ║
+║                                                                                                            ║
+║           ██████╗ ███████╗██╗   ██╗███╗   ██╗ █████╗ ██╗  ██╗   ██╗████████╗██╗ ██████╗███████╗            ║
+║           ██╔══██╗██╔════╝██║   ██║████╗  ██║██╔══██╗██║  ╚██╗ ██╔╝╚══██╔══╝██║██╔════╝██╔════╝            ║
+║           ██████╔╝█████╗  ██║   ██║██╔██╗ ██║███████║██║   ╚████╔╝    ██║   ██║██║     ███████╗            ║
+║           ██╔══██╗██╔══╝  ╚██╗ ██╔╝██║╚██╗██║██╔══██║██║    ╚██╔╝     ██║   ██║██║     ╚════██║            ║
+║           ██║  ██║███████╗ ╚████╔╝ ██║ ╚████║██║  ██║███████╗██║      ██║   ██║╚██████╗███████║            ║
+║           ╚═╝  ╚═╝╚══════╝  ╚═══╝  ╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝╚═╝      ╚═╝   ╚═╝ ╚═════╝╚══════╝            ║
+║                                                                                                            ║
+║                                                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+[*] Mode: Binary Analysis (Ghidra)
+[*] Starting analysis of: vulnerable_app
+[+] Ghidra analysis completed successfully
+[+] AI analysis completed
+
+🎯 REVERSE ENGINEERING LEVERAGE POINTS:
+   Found 3 interesting target(s):
+
+   ┌─[1] check_password @ 0x00401234
+   │  Type: Comparison Gate
+   │  CWE: CWE-798
+   │  Why Interesting: Hardcoded password comparison using strcmp
+   │  Reverse Strategy: Patch JNZ to JMP or extract password from binary
+   └────────────────────────────────────────────────────────
+
+🔥 RECOMMENDED FOCUS:
+   Start with check_password function - contains authentication bypass opportunity
+```
+
+</details>
 
 ## 📁 Project Structure
 
+<details>
+<summary>📂 Click to expand project structure</summary>
+
 ```
-PRAHARI_NFSU_2_3_2/
-├── revnalytics.py            # CLI entry point
+REVNALYTICS/
+├── revnalytics.py              # Main CLI entry point
+├── README.md                   # This file
+├── SETUP.md                    # Detailed setup guide
+├── LICENSE                     # MIT License
 ├── backend/
-│   ├── ghidra_integration.py # Ghidra headless wrapper
-│   ├── ai_agent.py           # AI analysis integration
-│   ├── prompt_manager.py     # Prompt management
-│   ├── requirements.txt      # Python dependencies
-│   ├── uploads/              # Temporary file storage (gitignored)
-│   └── outputs/              # Analysis results (gitignored)
+│   ├── __init__.py
+│   ├── ai_agent.py             # Multi-LLM AI integration
+│   ├── ghidra_integration.py   # Ghidra headless wrapper
+│   ├── prompt_manager.py       # AI prompt management
+│   └── requirements.txt        # Python dependencies
 ├── ghidra_scripts/
-│   └── extract_functions.py  # Main Ghidra analysis script
-└── ai_agent_prompts/         # AI prompt templates
-    ├── system_prompt.txt
-    └── analysis_prompt_template.txt
+│   └── extract_functions.py    # Ghidra analysis script
+├── ai_agent_prompts/
+│   └── merged_prompt.txt       # AI prompt templates
+├── execution/                  # Test binaries
+│   ├── test1, test2, ...       # Compiled test programs
+│   └── testing_programs/       # Source code for test binaries
+│       ├── vuln_buffer_overflow.c
+│       ├── vuln_sql_injection.py
+│       └── ...                 # Various vulnerability examples
+└── ghidra_11.4.2_PUBLIC/       # Ghidra installation (optional)
 ```
+
+</details>
 
 ## 🔧 Configuration
 
 ### Ghidra Settings
 
-Update `backend/ghidra_integration.py` or set environment variables:
-- `GHIDRA_HOME`: Path to Ghidra installation
-- `GHIDRA_PROJECTS_DIR`: Directory for Ghidra projects
-- `GHIDRA_TIMEOUT`: Analysis timeout in seconds (default: 600)
+| Environment Variable | Default | Description |
+|---------------------|---------|-------------|
+| `GHIDRA_HOME` | - | Path to Ghidra installation |
+| `GHIDRA_PROJECTS_DIR` | `/tmp/ghidra_projects` | Temporary project directory |
+| `GHIDRA_TIMEOUT` | `600` | Analysis timeout in seconds |
 
-### AI Agent Settings
+### Supported Languages (Source Mode)
 
-The system supports multiple LLM providers with automatic fallback:
-- **Fallback order**: OpenAI → Perplexity → DeepSeek → Mistral → Hugging Face → Basic
-- All LLMs use the same prompts from `ai_agent_prompts/` directory
-- Configure API keys in `backend/.env` file
-- If no API keys are provided, the system uses basic rule-based analysis
-
-To customize models, edit `backend/ai_agent.py`:
-- OpenAI: Change `gpt-4o-mini` to `gpt-4` for better analysis
-- Perplexity: Change `sonar-pro` to `sonar` for faster/cheaper
-- DeepSeek: Uses `deepseek-chat` model
-- Mistral: Change `mistral-medium-latest` to `mistral-small-latest` for faster/cheaper
-- Temperature: Adjust for more/less creative responses (default: 0.3)
-- Max tokens: Increase for longer explanations (default: 1500)
+| Extension | Language |
+|-----------|----------|
+| `.c`, `.h` | C |
+| `.cpp`, `.cc`, `.hpp` | C++ |
+| `.py` | Python |
+| `.js`, `.ts` | JavaScript/TypeScript |
+| `.go` | Go |
+| `.rs` | Rust |
+| `.java` | Java |
+| `.php` | PHP |
 
 ## 📊 Analysis Output
 
-The system generates:
+### Leverage Point Types
 
-1. **Ghidra JSON Output**: Technical analysis including:
-   - Functions and decompiled code
-   - Assembly instructions
-   - Imported libraries
-   - Risk indicators
-   - Strings and entry points
+| Type | Color | Description |
+|------|-------|-------------|
+| Crash Leverage | 🔴 Red | Buffer overflows, use-after-free |
+| Arithmetic Constraint | 🟣 Magenta | Integer overflows, format strings |
+| Comparison Gate | 🟡 Yellow | Authentication bypasses, license checks |
+| Environment Gate | 🔵 Blue | Environment variable manipulation |
+| Crypto Leverage | 🔵 Cyan | Weak cryptography, hardcoded keys |
+| Input Handler | 🟢 Green | User input processing points |
 
-2. **AI Explanation**: Simple, non-technical summary displayed in terminal
+### Output Includes
 
-3. **Safety Assessment**: 
-   - Verdict: SAFE, SUSPICIOUS, or MALICIOUS (color-coded)
-   - Confidence: HIGH, MEDIUM, or LOW
-   - Reasoning: Brief explanation
-
-4. **Saved Results**: Complete analysis saved to `backend/outputs/{analysis_id}_complete.json`
+- **Summary**: High-level analysis overview
+- **Function Count**: Total functions analyzed
+- **Call Flow**: Entry point and call relationships
+- **Reverse Leverage Points**: Security-relevant functions with:
+  - Function name and address
+  - Vulnerability type and CWE classification
+  - Assembly/code evidence
+  - Exploitation strategy
+- **Recommended Focus**: Where to start your analysis
 
 ## 🛡️ Security Features
 
-- File type validation
-- File size limits (max 100MB)
-- Secure file handling
-- Timeout protection
-- Error handling and logging
+- ✅ File size limits (max 100MB)
+- ✅ Timeout protection for analysis
+- ✅ Secure temporary file handling
+- ✅ Input path validation
+- ✅ Error handling and graceful degradation
 
 ## 🐛 Troubleshooting
 
-### Ghidra Not Found
-- Verify `GHIDRA_HOME` is set correctly
-- Check that `analyzeHeadless` script exists
-- Ensure Ghidra is executable
+<details>
+<summary>❓ Ghidra Not Found</summary>
 
-### Analysis Timeout
-- Increase `GHIDRA_TIMEOUT` in `ghidra_integration.py` or `.env` file
-- Check file size (very large binaries may need more time)
+```bash
+# Verify GHIDRA_HOME is set
+echo $GHIDRA_HOME
 
-### AI Analysis Not Working
-- Verify at least one API key is set (OPENAI_API_KEY, PERPLEXITY_API_KEY, DEEPSEEK_API_KEY, MISTRAL_API_KEY, or HUGGINGFACE_API_KEY)
-- Check API quota/limits for the provider you're using
-- System will automatically try other providers if one fails
-- System will fall back to rule-based analysis if all AI providers unavailable
+# Check analyzeHeadless exists
+ls $GHIDRA_HOME/support/analyzeHeadless
+```
 
-### File Path Issues
-- Use absolute paths or paths relative to current directory
-- Paths with spaces should work, but you can use quotes if needed
-- Tilde expansion (~) is supported for home directory
+</details>
+
+<details>
+<summary>⏱️ Analysis Timeout</summary>
+
+- Increase timeout: `GHIDRA_TIMEOUT=1200` (20 minutes)
+- Large binaries (>50MB) may need more time
+
+</details>
+
+<details>
+<summary>🤖 AI Analysis Issues</summary>
+
+- Verify API key in `backend/.env`
+- System automatically tries fallback providers
+- Falls back to rule-based analysis if all providers fail
+
+</details>
 
 ## 📝 License
 
-This project is for educational and research purposes.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🤝 Contributing
+
+Contributions are welcome! Here's how you can help:
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
+
+### Areas for Contribution
+
+- 🐛 Bug fixes and improvements
+- 📝 Documentation enhancements
+- 🔌 New LLM provider integrations
+- 🧪 Additional test cases and vulnerability samples
+- 🌐 Multi-language support
+
+## ⭐ Star History
+
+If you find this project useful, please consider giving it a star! ⭐
 
 ## 🙏 Acknowledgments
 
-- Ghidra by NSA
-- OpenAI, Perplexity, DeepSeek, Mistral, and Hugging Face for AI capabilities
+- [Ghidra](https://ghidra-sre.org/) by NSA - Reverse engineering framework
+- [OpenAI](https://openai.com/), [Perplexity](https://www.perplexity.ai/), [DeepSeek](https://www.deepseek.com/), [Mistral](https://mistral.ai/), [Hugging Face](https://huggingface.co/) - AI capabilities
+
+---
+
+<div align="center">
+
+**Made for security researchers and reverse engineers**
+
+</div>
