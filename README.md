@@ -46,7 +46,6 @@ flowchart LR
     C --> E[AI Agent<br/>Multi-LLM]
     D --> E
     E --> F[Results Display<br/>Color-coded]
-    F --> G[JSON Report<br/>Optional]
 ```
 
 <details>
